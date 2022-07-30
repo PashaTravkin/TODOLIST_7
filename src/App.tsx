@@ -5,16 +5,22 @@ import {v1} from 'uuid';
 import {AddItemForm} from './AddItemForm';
 import {Container, Grid, Paper} from "@mui/material";
 import BarApp from "./AppBar";
-import TaskReducer, {
+import TasksReducer, {
     addTaskAC,
     changeStatusAC,
     changeTaskTitleAC,
     removeTaskAC, removeTasksForRemoveTodoListAC,
     tasksForNewTodoListAC
 } from "./Reducers/TaskReducer";
+import TodoListsReducer, {
+    addTodolistAC,
+    changeFilterAC,
+    changeTodolistTitleAC,
+    removeTodolistAC
+} from "./Reducers/TodoListsReducer";
 
 export type FilterValuesType = "all" | "active" | "completed";
-type TodolistType = {
+export type TodolistType = {
     id: string
     title: string
     filter: FilterValuesType
@@ -24,41 +30,30 @@ export type TasksStateType = {
     [key: string]: Array<TaskType>
 }
 
-
 function App() {
-
 
     let todolistId1 = v1();
     let todolistId2 = v1();
 
-    let [todolists, setTodolists] = useState<Array<TodolistType>>([
+    let [todolists, dispatchTodolists] = useReducer(TodoListsReducer, [
         {id: todolistId1, title: "What to learn", filter: "all"},
         {id: todolistId2, title: "What to buy", filter: "all"}
     ])
 
     function addTodolist(title: string) {
         let newTodolistId = v1();
-        let newTodolist: TodolistType = {id: newTodolistId, title: title, filter: 'all'};
-        setTodolists([newTodolist, ...todolists]);
+        dispatchTodolists(addTodolistAC(title,newTodolistId))
         dispatchTasks(tasksForNewTodoListAC(newTodolistId))
-        // setTasks({
-        //     ...tasks,
-        //     [newTodolistId]: []
-        // })
     }
 
-
     function changeFilter(value: FilterValuesType, todolistId: string) {
-        let todolist = todolists.find(tl => tl.id === todolistId);
-        if (todolist) {
-            todolist.filter = value;
-            setTodolists([...todolists])
-        }
+        dispatchTodolists(changeFilterAC(value, todolistId))
     }
 
     function removeTodolist(id: string) {
         // засунем в стейт список тудулистов, id которых не равны тому, который нужно выкинуть
-        setTodolists(todolists.filter(tl => tl.id != id));
+        // setTodolists(todolists.filter(tl => tl.id != id));
+        dispatchTodolists(removeTodolistAC(id))
         // удалим таски для этого тудулиста из второго стейта, где мы храним отдельно таски
         delete tasks[id]; // удаляем св-во из объекта... значением которого являлся массив тасок
         // засетаем в стейт копию объекта, чтобы React отреагировал перерисовкой
@@ -67,16 +62,17 @@ function App() {
     }
 
     function changeTodolistTitle(id: string, title: string) {
+        dispatchTodolists(changeTodolistTitleAC(id, title))
         // найдём нужный todolist
-        const todolist = todolists.find(tl => tl.id === id);
-        if (todolist) {
-            // если нашёлся - изменим ему заголовок
-            todolist.title = title;
-            setTodolists([...todolists]);
-        }
+        // const todolist = todolists.find(tl => tl.id === id);
+        // if (todolist) {
+        //     // если нашёлся - изменим ему заголовок
+        //     todolist.title = title;
+        //     setTodolists([...todolists]);
+        // }
     }
 
-    let [tasks, dispatchTasks] = useReducer(TaskReducer, {
+    let [tasks, dispatchTasks] = useReducer(TasksReducer, {
         [todolistId1]: [
             {id: v1(), title: "HTML&CSS", isDone: true},
             {id: v1(), title: "JS", isDone: true}

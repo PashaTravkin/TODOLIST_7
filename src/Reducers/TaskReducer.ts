@@ -34,9 +34,10 @@ export const TaskReducer = (state: TasksStateType, action: tsarType) => {
             case "TASKS-FOR-NEW-TODOLIST": {
                 return ({...state, [action.payload.newTodolistId]: []})
             }
-            case "REMOVE-TASKS-FOR-REMOVE-TODOLIST":{
+            case "REMOVE-TASKS-FOR-REMOVE-TODOLIST": {
                 return ({...state})
             }
+
             default:
                 return state
         }
@@ -56,6 +57,7 @@ type removeTaskACType = ReturnType<typeof removeTaskAC>
 type changeStatusACType = ReturnType<typeof changeStatusAC>
 type tasksForNewTodoListACType = ReturnType<typeof tasksForNewTodoListAC>
 type removeTasksForRemoveTodoListACType = ReturnType<typeof removeTasksForRemoveTodoListAC>
+
 
 export const changeTaskTitleAC = (id: string, newTitle: string, todolistId: string) => {
     return {
